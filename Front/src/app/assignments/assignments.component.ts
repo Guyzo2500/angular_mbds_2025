@@ -41,7 +41,7 @@ export class AssignmentsComponent implements OnInit {
   prevPage = null;
   nextPage = 2;
   // Pour la data table angular
-  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques'];
+  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques', 'prof'];
 
   // Attention, pour l'injection de service, mettre en private !!! Sinon
   // ça ne marche pas

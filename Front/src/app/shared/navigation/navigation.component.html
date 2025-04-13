@@ -1,0 +1,37 @@
+<mat-sidenav-container class="example-container" autosize>
+
+  <mat-sidenav #sidenav mode="side" opened>
+    <mat-nav-list>
+      <a mat-list-item routerLink="/home">
+        <mat-icon>home</mat-icon>
+        <span>Accueil</span>
+      </a>
+      <a mat-list-item routerLink="/add">
+        <mat-icon>add_circle</mat-icon>
+        <span>Ajouter un devoir</span>
+      </a>
+      <a mat-list-item routerLink="/assignments">
+        <mat-icon>list</mat-icon>
+        <span>Liste des devoirs</span>
+      </a>
+      <a mat-list-item routerLink="/login">
+        <mat-icon>login</mat-icon>
+        <span>Connexion</span>
+      </a>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <mat-toolbar color="primary">
+      <button mat-icon-button (click)="sidenav.toggle()">
+        <mat-icon>menu</mat-icon>
+      </button>
+      <span>TP Assignments - MBDS</span>
+    </mat-toolbar>
+
+    <div class="content" style="padding: 20px;">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+
+</mat-sidenav-container>

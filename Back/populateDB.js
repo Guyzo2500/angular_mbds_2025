@@ -19,11 +19,14 @@ const matieres = [
 // 🧠 Génération d'un devoir fictif
 const createFakeAssignment = () => {
   const matiere = faker.helpers.arrayElement(matieres);
+  const firstName = faker.person.firstName('male');
+  const lastName = faker.person.lastName();
+  const fullName = `${firstName} ${lastName}`;
   return new Assignment({
-    nom: faker.hacker.phrase(),
+    nom: fullName,
     dateDeRendu: faker.date.future(),
     rendu: faker.datatype.boolean(),
-    auteur: faker.person.fullName(),
+    auteur: fullName,
     matiere: matiere.nom,
     prof: matiere.prof,
     imageMatiere: matiere.image,
