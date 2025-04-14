@@ -7,13 +7,15 @@ import { catchError, map } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
+  private roleKey = 'userRole';
+
   constructor(private http: HttpClient) {}
 
   login(username: string, password: string): Observable<boolean> {
     return this.http.post<any>('http://localhost:8010/api/login', { login: username, password })
       .pipe(
         map(res => {
-          localStorage.setItem('user', res.role);
+          localStorage.setItem(this.roleKey, res.role); // On stocke le rôle de l'utilisateur
           return true;
         }),
         catchError(() => {
@@ -23,11 +25,16 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('user');
+    localStorage.removeItem(this.roleKey);
+    // Tu peux aussi ajouter d'autres suppressions si besoin (ex: token, session)
   }
 
   getUserRole(): string | null {
-    return localStorage.getItem('user');
+    return localStorage.getItem(this.roleKey);
+  }
+
+  getRoleConnecte(): string {
+    return this.getUserRole() || '';
   }
 
   isLoggedIn(): boolean {

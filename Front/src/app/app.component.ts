@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { NavigationComponent } from './shared/navigation/navigation.component';
 import { RouterModule } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar'; // Import du module MatToolbarModule
 import { AuthService } from './shared/auth.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NavigationComponent, RouterModule],
+  imports: [NavigationComponent, RouterModule, MatToolbarModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
