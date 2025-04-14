@@ -43,4 +43,8 @@ let port = process.env.PORT || 8010;
 app.listen(port, "0.0.0.0");
 console.log('🚀 Serveur démarré sur : http://localhost:' + port);
 
+// Routes pour l'authentification
+const authRoute = require('./routes/auth');
+app.use('/api', authRoute);
+
 module.exports = app;
