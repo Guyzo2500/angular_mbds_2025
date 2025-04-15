@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RenduDirective } from '../shared/rendu.directive';
 import { NonRenduDirective } from '../shared/non-rendu.directive';
@@ -8,22 +8,55 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
+import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
+import { MatSort } from '@angular/material/sort';
 import { FormsModule } from '@angular/forms';
 import { Assignment } from './assignment.model';
 import { AssignmentDetailComponent } from './assignment-detail/assignment-detail.component';
 import { AssignmentsService } from '../shared/assignments.service';
 import { Router, RouterLink } from '@angular/router';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatIconModule } from '@angular/material/icon';
+import { MatSliderModule } from '@angular/material/slider';
+import { RouterModule } from '@angular/router';
+
+// Interface pour la réponse paginée
+interface PaginatedResponse {
+  docs: Assignment[];
+  totalDocs: number;
+  limit: number;
+  totalPages: number;
+  page: number;
+  pagingCounter: number;
+  hasPrevPage: boolean;
+  hasNextPage: boolean;
+  prevPage: number | null;
+  nextPage: number | null;
+}
 
 @Component({
   selector: 'app-assignments',
-  imports: [CommonModule, RenduDirective, NonRenduDirective,
-    MatListModule, MatDividerModule, MatButtonModule,
-    MatInputModule,MatFormFieldModule,FormsModule,
-    MatTableModule, MatPaginatorModule,
-    RouterLink],
   templateUrl: './assignments.component.html',
-  styleUrl: './assignments.component.css'
+  styleUrls: ['./assignments.component.css'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RenduDirective,
+    NonRenduDirective,
+    MatListModule,
+    MatDividerModule,
+    MatButtonModule,
+    MatInputModule,
+    MatFormFieldModule,
+    FormsModule,
+    MatTableModule,
+    MatPaginatorModule,
+    RouterLink,
+    MatChipsModule,
+    MatIconModule,
+    MatSliderModule,
+    RouterModule
+  ]
 })
 
 export class AssignmentsComponent implements OnInit {
@@ -32,16 +65,19 @@ export class AssignmentsComponent implements OnInit {
 
   // Pour la pagination
   page = 1;
-  limit = 4;
-  totalDocs = 2000;
-  totalPages = 667;
+  limit = 40;
+  totalDocs = 0;
+  totalPages = 0;
   pagingCounter = 1;
   hasPrevPage = false;
-  hasNextPage = true;
-  prevPage = null;
-  nextPage = 2;
+  hasNextPage = false;
+  prevPage: number | null = null;
+  nextPage: number | null = null;
   // Pour la data table angular
-  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques', 'prof'];
+  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques'];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
   // Attention, pour l'injection de service, mettre en private !!! Sinon
   // ça ne marche pas
@@ -64,7 +100,7 @@ export class AssignmentsComponent implements OnInit {
 
   getAssignments() {
     this.assignementsService.getAssignmentsPagines(this.page, this.limit)
-      .subscribe(data => {
+      .subscribe((data: PaginatedResponse) => {
         this.assignments.data = data.docs;
         this.page = data.page;
         this.limit = data.limit;
@@ -82,13 +118,17 @@ export class AssignmentsComponent implements OnInit {
   }
 
   pageSuivante() {
-    this.page++;
-    this.getAssignments();
+    if(this.hasNextPage && this.nextPage) {
+      this.page = this.nextPage;
+      this.getAssignments();
+    }
   }
 
   pagePrecedente() {
-    this.page--;
-    this.getAssignments();
+    if(this.hasPrevPage && this.prevPage) {
+      this.page = this.prevPage;
+      this.getAssignments();
+    }
   }
 
   dernierePage() {
