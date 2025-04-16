@@ -76,7 +76,7 @@ export class AssignmentsComponent implements OnInit {
   prevPage: number | null = null;
   nextPage: number | null = null;
   // Pour la data table angular
-  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques'];
+  displayedColumns: string[] = ['nom', 'dateDeRendu', 'rendu', 'auteur', 'matiere', 'note', 'remarques', 'actions'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
