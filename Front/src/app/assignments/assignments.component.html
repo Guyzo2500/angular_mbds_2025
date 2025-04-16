@@ -45,7 +45,7 @@
     </button>
   </div>
 
-  <!-- Table améliorée -->
+  <!-- Table -->
   <table mat-table [dataSource]="assignments" class="mat-elevation-z8">
     <!-- Nom Column -->
     <ng-container matColumnDef="nom">
@@ -65,11 +65,11 @@
     <ng-container matColumnDef="rendu">
       <th mat-header-cell *matHeaderCellDef> État </th>
       <td mat-cell *matCellDef="let element">
-        <mat-chip-list>
+        <mat-chip-listbox>
           <mat-chip [color]="element.rendu ? 'accent' : 'warn'" selected>
             {{element.rendu ? 'Rendu' : 'Non rendu'}}
           </mat-chip>
-        </mat-chip-list>
+        </mat-chip-listbox>
       </td>
     </ng-container>
 

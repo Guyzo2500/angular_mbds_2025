@@ -3,11 +3,17 @@ import { NavigationComponent } from './shared/navigation/navigation.component';
 import { RouterModule } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar'; // Import du module MatToolbarModule
 import { AuthService } from './shared/auth.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [NavigationComponent, RouterModule, MatToolbarModule],
+  imports: [
+    CommonModule,
+    NavigationComponent,
+    RouterModule,
+    MatToolbarModule
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })

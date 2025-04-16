@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RenduDirective } from '../shared/rendu.directive';
-import { NonRenduDirective } from '../shared/non-rendu.directive';
 import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
@@ -9,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginatorModule, MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
+import { MatSort, MatSortModule } from '@angular/material/sort';
 import { FormsModule } from '@angular/forms';
 import { Assignment } from './assignment.model';
 import { AssignmentDetailComponent } from './assignment-detail/assignment-detail.component';
@@ -19,6 +17,10 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSliderModule } from '@angular/material/slider';
 import { RouterModule } from '@angular/router';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ConfirmDialogComponent } from '../shared/confirm-dialog/confirm-dialog.component';
 
 // Interface pour la réponse paginée
 interface PaginatedResponse {
@@ -41,8 +43,6 @@ interface PaginatedResponse {
   standalone: true,
   imports: [
     CommonModule,
-    RenduDirective,
-    NonRenduDirective,
     MatListModule,
     MatDividerModule,
     MatButtonModule,
@@ -51,11 +51,13 @@ interface PaginatedResponse {
     FormsModule,
     MatTableModule,
     MatPaginatorModule,
+    MatSortModule,
     RouterLink,
     MatChipsModule,
     MatIconModule,
     MatSliderModule,
-    RouterModule
+    RouterModule,
+    MatTooltipModule
   ]
 })
 
@@ -82,7 +84,9 @@ export class AssignmentsComponent implements OnInit {
   // Attention, pour l'injection de service, mettre en private !!! Sinon
   // ça ne marche pas
   constructor(private assignementsService: AssignmentsService,
-              private router: Router) {}
+              private router: Router,
+              private dialog: MatDialog,
+              private snackBar: MatSnackBar) {}
 
   ngOnInit() {
     console.log("ngOnInit appelé lors de l'instanciation du composant");
@@ -161,5 +165,34 @@ export class AssignmentsComponent implements OnInit {
     let id = row._id;
     // et on utilise le routeur pour afficher le détail de l'assignment
     this.router.navigate(['/assignments', id]);
+  }
+
+  // Méthode de suppression avec confirmation
+  onDeleteAssignment(assignment: Assignment) {
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: '400px',
+      data: { 
+        title: 'Confirmation de suppression',
+        message: `Êtes-vous sûr de vouloir supprimer le devoir "${assignment.nom}" ?`
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.assignementsService.deleteAssignment(assignment).subscribe({
+          next: () => {
+            this.snackBar.open('Devoir supprimé avec succès', 'Fermer', {
+              duration: 3000
+            });
+            this.getAssignments(); // Rafraîchir la liste
+          },
+          error: (error) => {
+            this.snackBar.open('Erreur lors de la suppression', 'Fermer', {
+              duration: 3000
+            });
+          }
+        });
+      }
+    });
   }
 }

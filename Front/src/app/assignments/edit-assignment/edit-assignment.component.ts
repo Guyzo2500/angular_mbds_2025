@@ -1,70 +1,158 @@
 import { Component, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatDatepickerModule } from '@angular/material/datepicker';
-import { provideNativeDateAdapter } from '@angular/material/core';
-import { Assignment } from '../assignment.model';
-import { AssignmentsService } from '../../shared/assignments.service';
+import { MatNativeDateModule } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatIconModule } from '@angular/material/icon';
 import { ActivatedRoute, Router } from '@angular/router';
+import { AssignmentsService } from '../../shared/assignments.service';
+import { MatieresService } from '../../shared/matiere.service';
+import { Assignment } from '../assignment.model';
+import { Matiere } from '../../shared/models/matiere.model';
 
 @Component({
- selector: 'app-edit-assignment',
- standalone: true,
- providers: [provideNativeDateAdapter()],
- imports: [
-   FormsModule,
-   MatInputModule,
-   MatFormFieldModule,
-   MatDatepickerModule,
-   MatButtonModule,
- ],
- templateUrl: './edit-assignment.component.html',
- styleUrl: './edit-assignment.component.css',
+  selector: 'app-edit-assignment',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatCardModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatSnackBarModule,
+    MatIconModule
+  ],
+  templateUrl: './edit-assignment.component.html',
+  styleUrls: ['./edit-assignment.component.css']
 })
 export class EditAssignmentComponent implements OnInit {
-  assignment: Assignment | undefined;
-  // Pour les champs de formulaire
-  nomAssignment = '';
-  dateDeRendu?: Date = undefined;
- 
+  assignmentForm!: FormGroup;
+  assignment?: Assignment;
+  matieres: Matiere[] = [];
+
   constructor(
     private assignmentsService: AssignmentsService,
+    private matieresService: MatieresService,
+    private route: ActivatedRoute,
     private router: Router,
-    private route:ActivatedRoute
-  ) {}
- 
-  ngOnInit() {
-    // On va récupérer l'id dans la route (dans l'URL)
-    // on récupère l'assignment à modifier
-    const _id = this.route.snapshot.params['id'];
+    private formBuilder: FormBuilder,
+    private snackBar: MatSnackBar
+  ) {
+    this.initForm();
+  }
 
-    this.assignmentsService.getAssignment(_id)
-    .subscribe(a => {
-      this.assignment = a;
-      if (this.assignment) {
-        this.nomAssignment = this.assignment.nom;
-        this.dateDeRendu = this.assignment.dateDeRendu;
+  private initForm() {
+    this.assignmentForm = this.formBuilder.group({
+      nom: ['', [Validators.required, Validators.minLength(3)]],
+      dateDeRendu: ['', Validators.required],
+      matiere: ['', Validators.required],
+      auteur: ['', [Validators.required, Validators.minLength(3)]],
+      rendu: [false],
+      note: [{ value: '', disabled: true }],
+      remarques: ['']
+    });
+
+    // Active/désactive le champ note en fonction de l'état rendu
+    this.assignmentForm.get('rendu')?.valueChanges.subscribe(rendu => {
+      const noteControl = this.assignmentForm.get('note');
+      if (rendu) {
+        noteControl?.enable();
+        noteControl?.setValidators([Validators.required, Validators.min(0), Validators.max(20)]);
+      } else {
+        noteControl?.disable();
+        noteControl?.clearValidators();
+      }
+      noteControl?.updateValueAndValidity();
+    });
+  }
+
+  ngOnInit(): void {
+    // Charger les matières
+    this.matieresService.getMatieres().subscribe({
+      next: (matieres) => {
+        this.matieres = matieres;
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors du chargement des matières', 'Fermer', {
+          duration: 3000
+        });
+      }
+    });
+
+    // Charger l'assignment à éditer
+    const id = this.route.snapshot.params['id'];
+    this.assignmentsService.getAssignment(id).subscribe({
+      next: (assignmentRecu) => {
+        if (assignmentRecu) {
+          this.assignment = assignmentRecu;
+          this.assignmentForm.patchValue({
+            nom: this.assignment.nom,
+            dateDeRendu: this.assignment.dateDeRendu,
+            matiere: this.assignment.matiere,
+            auteur: this.assignment.auteur,
+            rendu: this.assignment.rendu,
+            note: this.assignment.note,
+            remarques: this.assignment.remarques
+          });
+
+          if (this.assignment.rendu) {
+            this.assignmentForm.get('note')?.enable();
+          }
+        } else {
+          this.snackBar.open('Assignment non trouvé', 'Fermer', {
+            duration: 3000
+          });
+          this.router.navigate(['/assignments']);
+        }
+      },
+      error: (error) => {
+        this.snackBar.open('Erreur lors du chargement du devoir', 'Fermer', {
+          duration: 3000
+        });
+        this.router.navigate(['/assignments']);
       }
     });
   }
-  onSaveAssignment() {
-    if (!this.assignment) return;
-    if (this.nomAssignment == '' || this.dateDeRendu === undefined) return;
- 
-    // on récupère les valeurs dans le formulaire
-    this.assignment.nom = this.nomAssignment;
-    this.assignment.dateDeRendu = this.dateDeRendu;
-    this.assignmentsService
-      .updateAssignment(this.assignment)
-      .subscribe((message) => {
-        console.log(message);
- 
-        // navigation vers la home page
-        this.router.navigate(['/home']);
+
+  onSubmit() {
+    if (this.assignmentForm.valid && this.assignment) {
+      const updatedAssignment = {
+        ...this.assignment,
+        ...this.assignmentForm.value,
+        dateDeRendu: new Date(this.assignmentForm.value.dateDeRendu)
+      };
+
+      this.assignmentsService.updateAssignment(updatedAssignment).subscribe({
+        next: () => {
+          this.snackBar.open('Devoir mis à jour avec succès', 'OK', {
+            duration: 2000
+          });
+          this.router.navigate(['/assignments']);
+        },
+        error: (error) => {
+          this.snackBar.open('Erreur lors de la mise à jour', 'Fermer', {
+            duration: 3000
+          });
+        }
       });
+    }
   }
- }
+
+  onCancel() {
+    this.router.navigate(['/assignments']);
+  }
+}
  
  
