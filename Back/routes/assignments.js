@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 let Assignment = require('../model/assignment');
+const authMiddleware = require('../middleware/authMiddleware'); // Import du middleware
 
 // Récupérer tous les assignments (GET)
 function getAssignments(req, res){
@@ -128,8 +129,10 @@ function deleteAssignment(req, res) {
 
 router.get('/', getAssignmentsAvecPagination);
 router.get('/:id', getAssignment);
-router.post('/', postAssignment);
-router.put('/', updateAssignment);
-router.delete('/:id', deleteAssignment);
+
+// Routes protégées
+router.post('/', authMiddleware, postAssignment);
+router.put('/', authMiddleware, updateAssignment);
+router.delete('/:id', authMiddleware, deleteAssignment);
 
 module.exports = router;

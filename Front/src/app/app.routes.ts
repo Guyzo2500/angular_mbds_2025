@@ -9,13 +9,13 @@ import { StatsComponent } from './stats/stats.component';
 import { MatieresComponent } from './matieres/matieres.component';
 
 export const routes: Routes = [
-    {path: '', component: AssignmentsComponent},
-    {path: 'home', component: AssignmentsComponent},
+    {path: '', redirectTo: 'login', pathMatch: 'full'},
+    {path: 'home', component: AssignmentsComponent, canActivate: [authGuard]},
     {path: 'add', component: AddAssignmentComponent, canActivate: [authGuard]},
-    {path: 'assignments/:id', component: AssignmentDetailComponent},
+    {path: 'assignments/:id', component: AssignmentDetailComponent, canActivate: [authGuard]},
     {path: 'assignments/:id/edit', component: EditAssignmentComponent, canActivate: [authGuard]},
     {path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
-    {path: 'stats', component: StatsComponent},
-    {path: 'matieres', component: MatieresComponent},
+    {path: 'stats', component: StatsComponent, canActivate: [authGuard]},
+    {path: 'matieres', component: MatieresComponent, canActivate: [authGuard]},
     {path: '**', component:NavigationErrorComponent}
 ];

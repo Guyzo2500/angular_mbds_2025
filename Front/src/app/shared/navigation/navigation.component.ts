@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../auth.service';
 
 @Component({
   selector: 'app-navigation',
@@ -25,7 +26,7 @@ import { CommonModule } from '@angular/common';
 export class NavigationComponent {
   @ViewChild('sidenav') sidenav!: MatSidenav;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, public authService: AuthService) {}
 
   // Méthode pour vérifier si un lien est actif
   isActive(route: string): boolean {

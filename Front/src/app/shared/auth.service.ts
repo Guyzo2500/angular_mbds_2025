@@ -26,7 +26,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.roleKey);
-    // Tu peux aussi ajouter d'autres suppressions si besoin (ex: token, session)
+    window.location.href = '/login';
   }
 
   getUserRole(): string | null {
