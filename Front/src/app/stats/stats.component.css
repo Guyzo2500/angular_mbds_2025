@@ -49,15 +49,25 @@
 
 .chart-card {
   margin-top: 20px;
+  background: #2d2d2d;
+  border-radius: 10px;
+}
+
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
   padding: 20px;
 }
 
-.chart-card mat-card-header {
-  margin-bottom: 20px;
+mat-card-header {
+  color: white;
+  padding: 16px;
 }
 
-.chart-card mat-card-content {
-  height: 400px;
+mat-card-title {
+  font-size: 1.2em !important;
+  margin-bottom: 0 !important;
 }
 
 /* Responsive design */

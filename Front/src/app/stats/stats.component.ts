@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { AssignmentsService } from '../shared/assignments.service';
-import { Chart } from 'chart.js';
+import { Chart } from 'chart.js/auto';
 import { Assignment } from '../assignments/assignment.model';
+
 
 @Component({
   selector: 'app-stats',
@@ -22,95 +23,109 @@ export class StatsComponent implements OnInit {
   rendusPercentage: number = 0;
   averageNote: number = 0;
   nonRendusCount: number = 0;
+  chart: any;
 
   constructor(private assignmentsService: AssignmentsService) { }
 
-  ngOnInit() {
+  ngOnInit(): void {
     this.loadStats();
   }
 
   loadStats() {
-    this.assignmentsService.getAssignmentsPagines(1, 1000).subscribe(data => {
+    this.assignmentsService.getAssignmentsPagines(1, 1000).subscribe((data: any) => {
       const assignments: Assignment[] = data.docs;
-      this.totalAssignments = data.totalDocs;
+      this.totalAssignments = assignments.length;
       
-      // Calcul du pourcentage de devoirs rendus
-      const rendus = assignments.filter(a => a.rendu).length;
+      const rendus = assignments.filter((a: Assignment) => a.rendu).length;
       this.rendusPercentage = Math.round((rendus / this.totalAssignments) * 100);
-
-      // Correction du calcul de la moyenne des notes
-      const notesArray = assignments
-        .filter(a => a.rendu && typeof a.note === 'number')
-        .map(a => a.note as number); // Cast explicite car on a vérifié que c'est un nombre
-
-      this.averageNote = notesArray.length > 0 
-        ? notesArray.reduce((acc, curr) => acc + curr, 0) / notesArray.length 
+      
+      const notes = assignments
+        .filter((a: Assignment) => a.rendu && typeof a.note === 'number')
+        .map((a: Assignment) => a.note as number);
+      
+      this.averageNote = notes.length > 0 
+        ? Math.round((notes.reduce((a: number, b: number) => a + b, 0) / notes.length) * 10) / 10 
         : 0;
+      
+      const now = new Date();
+      this.nonRendusCount = assignments
+        .filter((a: Assignment) => !a.rendu && new Date(a.dateDeRendu) < now).length;
 
-      // Calcul des devoirs non rendus
-      this.nonRendusCount = assignments.filter(a => !a.rendu).length;
+      const matiereStats = assignments.reduce((acc: {[key: string]: number}, curr: Assignment) => {
+        const matiere = curr.matiere?.nom ?? 'Non assigné';
+        acc[matiere] = (acc[matiere] || 0) + 1;
+        return acc;
+      }, {});
 
-      // Création du graphique après chargement des données
-      setTimeout(() => this.createChart(assignments), 0);
+      this.createChart(matiereStats);
     });
   }
 
-  createChart(assignments: Assignment[]) {
-    interface MatiereStats {
-      [key: string]: {
-        total: number;
-        rendus: number;
-        nonRendus: number;
-      }
+  createChart(matiereStats: {[key: string]: number}) {
+    const ctx = document.getElementById('matiereChart') as HTMLCanvasElement;
+    
+    if (this.chart) {
+      this.chart.destroy();
     }
 
-    // Grouper les assignments par matière
-    const matiereStats: MatiereStats = assignments.reduce((acc: MatiereStats, curr: Assignment) => {
-      const matiere = curr.matiere;
-      if (!acc[matiere]) {
-        acc[matiere] = {
-          total: 0,
-          rendus: 0,
-          nonRendus: 0
-        };
-      }
-      acc[matiere].total++;
-      if (curr.rendu) {
-        acc[matiere].rendus++;
-      } else {
-        acc[matiere].nonRendus++;
-      }
-      return acc;
-    }, {});
-
-    const canvas = document.getElementById('matiereChart') as HTMLCanvasElement;
-    if (canvas) {
-      new Chart(canvas, {
-        type: 'bar',
-        data: {
-          labels: Object.keys(matiereStats),
-          datasets: [
-            {
-              label: 'Rendus',
-              data: Object.values(matiereStats).map(stat => stat.rendus),
-              backgroundColor: '#4caf50'
-            },
-            {
-              label: 'Non rendus',
-              data: Object.values(matiereStats).map(stat => stat.nonRendus),
-              backgroundColor: '#f44336'
+    this.chart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(matiereStats),
+        datasets: [{
+          label: 'Nombre de devoirs',
+          data: Object.values(matiereStats),
+          backgroundColor: [
+            '#7b1fa2',
+            '#9c27b0',
+            '#ba68c8',
+            '#e1bee7',
+            '#4a148c',
+            '#6a1b9a'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: {
+              color: '#ffffff'
             }
-          ]
+          },
+          title: {
+            display: true,
+            text: 'Répartition des devoirs par matière',
+            color: '#ffffff',
+            font: {
+              size: 16
+            }
+          }
         },
-        options: {
-          responsive: true,
-          scales: {
-            y: {
-              beginAtZero: true
+        scales: {
+          y: {
+            beginAtZero: true,
+            ticks: {
+              color: '#ffffff'
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
+            }
+          },
+          x: {
+            ticks: {
+              color: '#ffffff'
+            },
+            grid: {
+              color: 'rgba(255, 255, 255, 0.1)'
             }
           }
         }
-      });
-    }
+      }
+    });
   }
 }
