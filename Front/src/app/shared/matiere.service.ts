@@ -8,11 +8,23 @@ import { Matiere } from './models/matiere.model';
   providedIn: 'root'
 })
 export class MatieresService {
-  private url = 'http://localhost:8010/api/matieres';  // Votre URL de l'API
+  uri = 'http://localhost:8010/api/matieres';
 
   constructor(private http: HttpClient) { }
 
   getMatieres(): Observable<Matiere[]> {
-    return this.http.get<Matiere[]>(this.url);
+    return this.http.get<Matiere[]>(this.uri);
+  }
+
+  addMatiere(matiere: Matiere): Observable<Matiere> {
+    return this.http.post<Matiere>(this.uri, matiere);
+  }
+
+  updateMatiere(matiere: Matiere): Observable<Matiere> {
+    return this.http.put<Matiere>(`${this.uri}/${matiere._id}`, matiere);
+  }
+
+  deleteMatiere(id: string): Observable<any> {
+    return this.http.delete(`${this.uri}/${id}`);
   }
 }

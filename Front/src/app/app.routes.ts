@@ -5,6 +5,8 @@ import { NavigationErrorComponent } from './navigation-error-component/navigatio
 import { AssignmentDetailComponent } from './assignments/assignment-detail/assignment-detail.component';
 import { EditAssignmentComponent } from './assignments/edit-assignment/edit-assignment.component';
 import { authGuard } from './shared/auth.guard';
+import { StatsComponent } from './stats/stats.component';
+import { MatieresComponent } from './matieres/matieres.component';
 
 export const routes: Routes = [
     {path: '', component: AssignmentsComponent},
@@ -12,6 +14,8 @@ export const routes: Routes = [
     {path: 'add', component: AddAssignmentComponent, canActivate: [authGuard]},
     {path: 'assignments/:id', component: AssignmentDetailComponent},
     {path: 'assignments/:id/edit', component: EditAssignmentComponent, canActivate: [authGuard]},
-    { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
+    {path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
+    {path: 'stats', component: StatsComponent},
+    {path: 'matieres', component: MatieresComponent},
     {path: '**', component:NavigationErrorComponent}
 ];

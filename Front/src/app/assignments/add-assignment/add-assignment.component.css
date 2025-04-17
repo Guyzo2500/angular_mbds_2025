@@ -4,3 +4,16 @@
     margin:5px;
  }
  
+.matiere-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matiere-icon {
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+ 

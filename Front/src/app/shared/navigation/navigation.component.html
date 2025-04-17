@@ -9,10 +9,33 @@
         <mat-icon>add_circle</mat-icon>
         <span>Ajouter un devoir</span>
       </a>
-      <a mat-list-item routerLink="/assignments" [class.active-link]="isActive('/assignments')" (click)="closeSidenav()">
-        <mat-icon>assignment</mat-icon>
-        <span>Liste des devoirs</span>
+
+      <!-- Nouvelle section pour les matières -->
+      <a mat-list-item routerLink="/matieres">
+        <mat-icon>school</mat-icon>
+        <span>Matières</span>
       </a>
+
+      <!-- Section pour les statistiques -->
+      <a mat-list-item routerLink="/stats">
+        <mat-icon>bar_chart</mat-icon>
+        <span>Statistiques</span>
+      </a>
+
+      <!-- Section pour le profil utilisateur -->
+      <a mat-list-item routerLink="/profile">
+        <mat-icon>person</mat-icon>
+        <span>Profil</span>
+      </a>
+
+      <!-- Section pour les paramètres -->
+      <a mat-list-item routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        <span>Paramètres</span>
+      </a>
+
+      <mat-divider></mat-divider>
+      
       <a mat-list-item routerLink="/login" [class.active-link]="isActive('/login')" (click)="closeSidenav()">
         <mat-icon>login</mat-icon>
         <span>Connexion</span>

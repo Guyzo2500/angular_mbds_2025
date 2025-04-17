@@ -80,15 +80,8 @@ export class EditAssignmentComponent implements OnInit {
 
   ngOnInit(): void {
     // Charger les matières
-    this.matieresService.getMatieres().subscribe({
-      next: (matieres) => {
-        this.matieres = matieres;
-      },
-      error: (error) => {
-        this.snackBar.open('Erreur lors du chargement des matières', 'Fermer', {
-          duration: 3000
-        });
-      }
+    this.matieresService.getMatieres().subscribe(matieres => {
+      this.matieres = matieres;
     });
 
     // Charger l'assignment à éditer

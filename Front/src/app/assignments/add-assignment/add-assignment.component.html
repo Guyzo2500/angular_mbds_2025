@@ -34,10 +34,13 @@
       <ng-template matStepLabel>Matière</ng-template>
       
       <mat-form-field>
-        <mat-label>Sélectionnez une matière</mat-label>
+        <mat-label>Matière</mat-label>
         <mat-select formControlName="matiere" required>
           <mat-option *ngFor="let matiere of matieres" [value]="matiere">
-            {{matiere.nom}}
+            <div class="matiere-option">
+              <img [src]="matiere.imageMatiere" class="matiere-icon" [alt]="matiere.nom">
+              <span>{{matiere.nom}} - Prof: {{matiere.prof.nom}}</span>
+            </div>
           </mat-option>
         </mat-select>
       </mat-form-field>
