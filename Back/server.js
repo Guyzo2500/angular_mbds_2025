@@ -38,7 +38,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // Servir les fichiers statiques du build Angular
-app.use(express.static(path.join(__dirname, 'dist')));
+const distPath = path.join(__dirname, '../Front/dist/assignment-app');
+app.use(express.static(distPath));
 
 // Routes API
 app.use('/api/assignments', assignment);
@@ -50,7 +51,7 @@ app.use('/api', authRoute);
 
 // Route pour toutes les autres requêtes -> renvoie vers l'application Angular
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist/index.html'));
+  res.sendFile(path.join(distPath, 'index.html'));
 });
 
 // Démarrage du serveur
