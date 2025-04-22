@@ -1,8 +1,9 @@
 const mongoose = require('mongoose');
 const { faker } = require('@faker-js/faker');
-const Assignment = require('./model/assignment'); // Assure-toi que le chemin est bon
+const Assignment = require('./model/assignment');
+const Matiere = require('./model/matiere');
 
-// 🔗 Connexion à ta propre base MongoDB (modifie si nécessaire)
+//Connexion à ta propre base MongoDB
 mongoose.connect('mongodb+srv://mbds:UniCA25@assignments.mxszzes.mongodb.net/assignments?retryWrites=true&w=majority'
 , {
   useNewUrlParser: true,
@@ -10,14 +11,42 @@ mongoose.connect('mongodb+srv://mbds:UniCA25@assignments.mxszzes.mongodb.net/ass
 });
 
 const matieres = [
-  { nom: 'Technologies Web', prof: 'Mr Buffa', image: 'assets/img/web.png' },
-  { nom: 'Base de Données', prof: 'Mme Diaby', image: 'assets/img/bdd.png' },
-  { nom: 'Big Data', prof: 'Mr Yao', image: 'assets/img/bigdata.png' },
-  { nom: 'DevOps', prof: 'Mme Akissi', image: 'assets/img/devops.png' }
+  { 
+    nom: 'Technologies Web',
+    imageMatiere: 'assets/img/web.png',
+    prof: {
+      nom: 'Mr Buffa',
+      photo: 'assets/img/profs/buffa.jpg'
+    }
+  },
+  { 
+    nom: 'Base de Données',
+    imageMatiere: 'assets/img/bdd.png',
+    prof: {
+      nom: 'Mme Diaby',
+      photo: 'assets/img/profs/diaby.jpg'
+    }
+  },
+  { 
+    nom: 'Big Data',
+    imageMatiere: 'assets/img/bigdata.png',
+    prof: {
+      nom: 'Mr Yao',
+      photo: 'assets/img/profs/yao.jpg'
+    }
+  },
+  { 
+    nom: 'DevOps',
+    imageMatiere: 'assets/img/devops.png',
+    prof: {
+      nom: 'Mme Akissi',
+      photo: 'assets/img/profs/akissi.jpg'
+    }
+  }
 ];
 
-// 🧠 Génération d'un devoir fictif
-const createFakeAssignment = () => {
+//Génération d'un devoir fictif
+const createFakeAssignment = async () => {
   const matiere = faker.helpers.arrayElement(matieres);
   const firstName = faker.person.firstName('male');
   const lastName = faker.person.lastName();
@@ -28,25 +57,34 @@ const createFakeAssignment = () => {
     rendu: faker.datatype.boolean(),
     auteur: fullName,
     matiere: matiere.nom,
-    prof: matiere.prof,
-    imageMatiere: matiere.image,
+    prof: matiere.prof.nom,
+    imageMatiere: matiere.imageMatiere,
     note: faker.number.int({ min: 0, max: 20 }),
     remarques: faker.lorem.sentence()
   });
 };
 
-// 🚀 Remplir la base
-const insertAssignments = async () => {
+// Remplir la base
+const insertData = async () => {
   try {
-    await Assignment.deleteMany({}); // Vide la base (optionnel)
+    // Supprimer les données existantes
+    await Promise.all([
+      Assignment.deleteMany({}),
+      Matiere.deleteMany({})
+    ]);
+
+    // Insérer les matières
+    await Matiere.insertMany(matieres);
+    console.log('✅ Matières insérées avec succès !');
+
+    // Insérer les assignments
     const assignments = [];
-
     for (let i = 0; i < 1000; i++) {
-      assignments.push(createFakeAssignment());
+      assignments.push(await createFakeAssignment());
     }
-
     await Assignment.insertMany(assignments);
     console.log('✅ 1000 devoirs insérés avec succès !');
+
   } catch (err) {
     console.error('❌ Erreur :', err);
   } finally {
@@ -54,4 +92,4 @@ const insertAssignments = async () => {
   }
 };
 
-insertAssignments();
+insertData();

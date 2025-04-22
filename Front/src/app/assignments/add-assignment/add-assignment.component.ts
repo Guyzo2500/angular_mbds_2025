@@ -14,6 +14,7 @@ import { Router } from '@angular/router';
 import { AssignmentsService } from '../../shared/assignments.service';
 import { MatieresService } from '../../shared/matiere.service';
 import { Matiere } from '../../shared/models/matiere.model';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 interface AssignmentResponse {
   _id: string;
@@ -33,7 +34,8 @@ interface AssignmentResponse {
     MatNativeDateModule,
     MatSelectModule,
     MatIconModule,
-    ReactiveFormsModule
+    ReactiveFormsModule,
+    MatSnackBarModule
   ],
   templateUrl: './add-assignment.component.html',
   styleUrls: ['./add-assignment.component.css']
@@ -43,12 +45,14 @@ export class AddAssignmentComponent implements OnInit {
   matiereForm!: FormGroup;
   stateForm!: FormGroup;
   matieres: Matiere[] = [];
+  isLinear = true;
 
   constructor(
     private _formBuilder: FormBuilder,
     private assignmentsService: AssignmentsService,
     private matieresService: MatieresService,
-    private router: Router
+    private router: Router,
+    private snackBar: MatSnackBar
   ) {
     this.initializeForms();
   }
@@ -60,14 +64,17 @@ export class AddAssignmentComponent implements OnInit {
       },
       error: (error: Error) => {
         console.error('Erreur lors du chargement des matières:', error);
+        this.snackBar.open('Erreur lors du chargement des matières', 'Fermer', {
+          duration: 3000
+        });
       }
     });
   }
 
   private initializeForms(): void {
     this.basicInfoForm = this._formBuilder.group({
-      nom: ['', Validators.required],
-      auteur: ['', Validators.required],
+      nom: ['', [Validators.required, Validators.minLength(3)]],
+      auteur: ['', [Validators.required, Validators.minLength(3)]],
       dateDeRendu: ['', Validators.required]
     });
 
@@ -120,11 +127,21 @@ export class AddAssignmentComponent implements OnInit {
 
       this.assignmentsService.addAssignment(assignment).subscribe({
         next: (response) => {
-          this.router.navigate(['/assignments']);
+          this.snackBar.open('Devoir ajouté avec succès', 'OK', {
+            duration: 2000
+          });
+          this.router.navigate(['/home']);
         },
         error: (error) => {
           console.error('Erreur lors de l\'ajout du devoir:', error);
+          this.snackBar.open('Erreur lors de l\'ajout du devoir', 'Fermer', {
+            duration: 3000
+          });
         }
+      });
+    } else {
+      this.snackBar.open('Veuillez remplir tous les champs requis', 'Fermer', {
+        duration: 3000
       });
     }
   }

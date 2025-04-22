@@ -93,9 +93,11 @@ function postAssignment(req, res){
 
     assignment.save( (err) => {
         if(err){
-            res.send('cant post assignment ', err);
+            console.error('Erreur lors de la sauvegarde:', err);
+            res.status(500).json({ message: 'Erreur lors de la sauvegarde', error: err });
+        } else {
+            res.status(201).json(assignment);
         }
-        res.json(assignment.id)
     })
 }
 
@@ -106,24 +108,21 @@ function updateAssignment(req, res) {
     Assignment.findByIdAndUpdate(req.body._id, req.body, {new: true}, (err, assignment) => {
         if (err) {
             console.log(err);
-            res.send(err)
+            res.status(500).json({ message: 'Erreur lors de la mise à jour', error: err });
         } else {
-          res.json("Assignment id=" + req.body._id + " updated");
+            res.json(assignment);
         }
-
-      // console.log('updated ', assignment)
     });
-
 }
 
 // suppression d'un assignment (DELETE)
 function deleteAssignment(req, res) {
-
     Assignment.findByIdAndRemove(req.params.id, (err, assignment) => {
         if (err) {
-            res.send(err);
+            res.status(500).json({ message: 'Erreur lors de la suppression', error: err });
+        } else {
+            res.json({ message: 'Assignment supprimé avec succès', assignment });
         }
-        res.json(assignment.nom + " deleted");
     })
 }
 

@@ -1,8 +1,10 @@
 let express = require('express');
 let app = express();
 let bodyParser = require('body-parser');
+let path = require('path');
 
 let assignment = require('./routes/assignments');
+let matieres = require('./routes/matieres');
 
 let mongoose = require('mongoose');
 mongoose.Promise = global.Promise;
@@ -26,7 +28,7 @@ mongoose.connect(uri, options)
 // Middleware CORS
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   next();
 });
@@ -35,16 +37,25 @@ app.use(function (req, res, next) {
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-// Routes
+// Servir les fichiers statiques du build Angular
+app.use(express.static(path.join(__dirname, 'dist')));
+
+// Routes API
 app.use('/api/assignments', assignment);
+app.use('/api/matieres', matieres);
+
+// Routes pour l'authentification
+const authRoute = require('./routes/auth');
+app.use('/api', authRoute);
+
+// Route pour toutes les autres requêtes -> renvoie vers l'application Angular
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/index.html'));
+});
 
 // Démarrage du serveur
 let port = process.env.PORT || 8010;
 app.listen(port, "0.0.0.0");
 console.log('🚀 Serveur démarré sur : http://localhost:' + port);
-
-// Routes pour l'authentification
-const authRoute = require('./routes/auth');
-app.use('/api', authRoute);
 
 module.exports = app;
